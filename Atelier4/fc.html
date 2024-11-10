@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain Post Management</title>
+    <style>
+        /* Basic styling for the page */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            font-size: 17px;
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadeInOut 4s;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        /* Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    font-size: 36px;
+    color: #3b5998;
+    margin-bottom: 20px;
+}
+
+/* Container Styles */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Section Titles */
+h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #4b4f56;
+}
+
+/* Post Form and Buttons */
+textarea, input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+button {
+    background-color: #3b5998;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #2d4373;
+}
+
+/* Post List and Styles */
+.post-card {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.post-author {
+    font-weight: bold;
+    font-size: 16px;
+    color: #3b5998;
+}
+
+.post-time {
+    font-size: 12px;
+    color: #888;
+}
+
+.post-message {
+    font-size: 16px;
+    margin: 10px 0;
+    line-height: 1.5;
+    color: #333;
+}
+
+.post-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+}
+
+.like-button {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: #888;
+}
+
+.like-button:hover {
+    color: #3b5998;
+}
+
+.like-button i {
+    margin-right: 5px;
+}
+
+/* Toast Notification */
+#toast {
+    visibility: hidden;
+    min-width: 250px;
+    margin-left: -125px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 2px;
+    padding: 16px;
+    position: fixed;
+    z-index: 1;
+    left: 50%;
+    bottom: 30px;
+    font-size: 17px;
+}
+
+#toast.show {
+    visibility: visible;
+    animation: fadeInOut 4s;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* Table Styles for Posts */
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+    </style>
+</head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain Post Management</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Blockchain Post Management</h1>
+        
+        <!-- Publish Post Form -->
+        <div>
+            <h3>Publish a Post</h3>
+            <textarea id="postMessage" rows="4" cols="50" placeholder="Enter your post message..."></textarea><br>
+            <button onclick="publishPost()">Publish Post</button>
+        </div>
+        
+        <!-- Get Post Details -->
+        <div>
+            <h3>Get Post Details</h3>
+            <input type="number" id="postId" placeholder="Enter Post ID" min="0"><br>
+            <button onclick="getPost()">Get Post</button>
+            <p id="postDetails"></p>
+        </div>
+        
+        <!-- Like Post -->
+        <div>
+            <h3>Like a Post</h3>
+            <input type="number" id="likePostId" placeholder="Enter Post ID to like" min="0"><br>
+            <button onclick="likePost()">Like Post</button>
+        </div>
+
+        <!-- Update Post -->
+        <div>
+            <h3>Update a Post</h3>
+            <input type="number" id="updatePostId" placeholder="Enter Post ID to update" min="0"><br>
+            <textarea id="newMessage" rows="4" cols="50" placeholder="Enter new message..."></textarea><br>
+            <button onclick="updatePost()">Update Post</button>
+        </div>
+
+        <!-- Delete Post -->
+        <div>
+            <h3>Delete a Post</h3>
+            <input type="number" id="deletePostId" placeholder="Enter Post ID to delete" min="0"><br>
+            <button onclick="deletePost()">Delete Post</button>
+        </div>
+
+        <!-- Posts List -->
+        <div>
+            <h3>Posts List</h3>
+            <table id="postsTable">
+                <thead>
+                    <tr>
+                        <th>Post ID</th>
+                        <th>Message</th>
+                        <th>Author</th>
+                        <th>Likes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Posts will be dynamically loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script>
+        let web3;
+        let contract;
+        const contractABI = [ /* Your contract ABI here */ ];
+        const contractAddress = "0xYourContractAddressHere"; // Replace with your contract address
+
+        async function loadWeb3() {
+            if (window.ethereum) {
+                web3 = new Web3(window.ethereum);
+                await window.ethereum.enable();
+            } else {
+                alert('Please install MetaMask!');
+            }
+        }
+
+        async function loadContract() {
+            contract = new web3.eth.Contract(contractABI, contractAddress);
+        }
+
+        function updateStatus(message) {
+            document.getElementById('status').innerText = message;
+            console.log(message);
+        }
+
+        // Toast function
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.innerText = message;
+            toast.className = "show";
+            setTimeout(function() {
+                toast.className = toast.className.replace("show", "");
+            }, 4000);
+        }
+
+        async function publishPost() {
+            const message = document.getElementById('postMessage').value;
+            const accounts = await web3.eth.getAccounts();
+            await contract.methods.publishPost(message).send({ from: accounts[0] });
+            showToast('Post published successfully.');
+            loadPosts(); // Reload posts after publishing
+        }
+
+        async function getPost() {
+            const postId = document.getElementById('postId').value;
+            const post = await contract.methods.getPost(postId).call();
+            document.getElementById('postDetails').innerText = `Message: ${post[0]}, Author: ${post[1]}, Likes: ${post[2]}`;
+        }
+
+        async function likePost() {
+            try {
+                const postId = document.getElementById('likePostId').value.trim();
+                if (postId === "" || isNaN(postId) || postId <= 0) {
+                    alert("Please enter a valid Post ID");
+                    return;
+                }
+
+                const postIdNumber = parseInt(postId, 10);
+                const accounts = await web3.eth.getAccounts();
+
+                const gasLimit = 2000000; 
+                const gasPrice = web3.utils.toWei('20', 'gwei'); 
+
+                const transaction = await contract.methods.likePost(postIdNumber).send({
+                    from: accounts[0],
+                    gas: gasLimit,
+                    gasPrice: gasPrice
+                });
+
+                const post = await contract.methods.getPost(postIdNumber).call();
+                console.log("Post liked successfully, new like count:", post.likeCount);
+
+                loadPosts(); // Reload posts after liking
+                showToast('Post liked successfully!');
+            } catch (error) {
+                console.error("Error liking post:", error);
+                showToast('Error liking post.');
+            }
+        }
+
+        async function updatePost() {
+            const postId = document.getElementById('updatePostId').value;
+            const newMessage = document.getElementById('newMessage').value;
+
+            if (postId === "" || newMessage === "") {
+                alert("Please fill out both fields!");
+                return;
+            }
+
+            const accounts = await web3.eth.getAccounts();
+            await contract.methods.updatePost(postId, newMessage).send({ from: accounts[0] });
+
+            showToast('Post updated successfully.');
+            loadPosts(); // Reload posts after update
+        }
+
+        async function deletePost() {
+            const postId = document.getElementById('deletePostId').value;
+
+            if (postId === "") {
+                alert("Please enter a valid Post ID to delete");
+                return;
+            }
+
+            const accounts = await web3.eth.getAccounts();
+            await contract.methods.deletePost(postId).send({ from: accounts[0] });
+
+            showToast('Post deleted successfully.');
+            loadPosts(); // Reload posts after deletion
+        }
+
+        async function loadPosts() {
+            const postCount = await contract.methods.getPostCount().call();
+            const tableBody = document.getElementById('postsTable').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '';  // Clear existing rows
+
+            for (let i = 0; i < postCount; i++) {
+                const post = await contract.methods.getPost(i).call();
+                const row = tableBody.insertRow();
+
+                const cell1 = row.insertCell(0);
+                cell1.innerText = i;
+
+                const cell2 = row.insertCell(1);
+                cell2.innerText = post[0]; // Message
+
+                const cell3 = row.insertCell(2);
+                cell3.innerText = post[1]; // Author
+
+                const cell4 = row.insertCell(3);
+                cell4.innerText = post[2]; // Likes
+            }
+        }
+
+        window.onload = async () => {
+            await loadWeb3();
+            await loadContract();
+            loadPosts(); // Load posts when page loads
+        }
+    </script>
+</body>
+</html>

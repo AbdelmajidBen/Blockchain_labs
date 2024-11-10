@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Social application </title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.6.1/dist/web3.min.js"></script>
+    <script src="./script.js" defer></script> <!-- Link JavaScript here -->
+ 
+    <body>
+        <!-- Navbar with Animated Logo -->
+        <div class="navbar bg-gray-900 text-white p-4 flex justify-between items-center">
+            <!-- Left side: Logo -->
+            <div class="text-2xl font-bold tracking-wide">ABM SOCIAL</div>
+          
+            <!-- Middle: Navigation Links -->
+            <div class="flex space-x-8 text-lg text-white">
+                <a href="#" class="hover:text-blue-400 transition duration-300 ease-in-out">Home</a>
+                <a href="#" class="hover:text-blue-400 transition duration-300 ease-in-out">Posts</a>
+                <a href="#" class="hover:text-blue-400 transition duration-300 ease-in-out">Reels</a>
+              </div>
+          
+            <!-- Right side: My Account Picture -->
+            <div class="flex items-center">
+              <img src="./Image/user.png" alt="My Account" class="w-10 h-10 rounded-full border-2 border-blue-500 hover:border-blue-400 transition duration-300 ease-in-out cursor-pointer" width="30px" >
+            </div>
+          </div>
+        <div class="mainpage">
+            <img src="./Image/i1.png" alt="icon" width="50px">
+            <h1 class="mr-2">ABM SOCIAL</h1>
+
+        </div>
+        <div class="sidebar">
+            <h2>Quick Links</h2>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Posts</a></li>
+                <li><a href="#">Reels</a></li>
+                <li><a href="#">Messages</a></li>
+                <li><a href="#">Notifications</a></li>
+                <li><a href="#">Settings</a></li>
+            </ul>
+    
+            <h2>Profile</h2>
+            <div class="profile-info">
+                <img src="./Image/user.png" alt="Profile Picture" class="profile-img" width="20px" height="20px">
+                <p><strong>Username</strong></p>
+                <p>Some description about the user or their status</p>
+            </div>
+    
+            <h2>See More</h2>
+            <ul>
+                <li><a href="#">Help</a></li>
+                <li><a href="#">Privacy Policy</a></li>
+                <li><a href="#">Terms & Conditions</a></li>
+            </ul>
+        </div>
+        <div class="right-sidebar">
+            <!-- Trending Section -->
+            <h2>Trending Now</h2>
+            <ul class="trending-list">
+                <li><a href="#">Trump Became Newest President</a></li>
+                <li><a href="#">Open Release Newest Model Gpt4-o</a></li>
+                <li><a href="#">The Role of Smart Contracts in Decentralized Finance (DeFi)</a></li>
+                <li><a href="#">The Impact of Cloud-Native Architectures on Scalability and Efficiency</a></li>
+            </ul>
+    
+            <!-- Recent Activities -->
+            <h2 style="text-align: center;">Recent Activities</h2>
+            <div class="recent-activities">
+                <p><strong>Ahmed Samady</strong> liked your tweet</p>
+                <p><strong>Fahd Chibani</strong> commented on your tweet</p>
+                <p><strong>@realmadrid</strong> posts a new reel</p>
+            </div>
+    
+            <!-- Advertisement Section -->
+            <h2 style="color: black;">Latest Posts From Your Fav Accounts</h2>
+            <div class="latest-posts">
+                <div class="post">
+                    <h3>Real Madrid's Latest Win Over Osasuna (4-0)</h3>
+                    <p>Real Madrid secured a dominant 4-0 win over Osasuna in their latest match, showcasing an impressive performance. The victory adds another strong result to their season's campaign.</p>
+                    <img src="./Image/t1.jpg" alt="" width="90px" style="display: block; margin-left: auto; margin-right: auto;">
+                </div>
+            
+                <div class="post">
+                    <h3>Max Verstappen Wins from P17 in Brazil</h3>
+                    <p>In a thrilling race at the Brazilian Grand Prix, Max Verstappen showcased his driving prowess, moving from 17th on the grid to claim victory. A remarkable achievement in the world of Formula 1!</p>
+                    <img src="./Image/t2.jpg" alt="" width="90px" style="display: block; margin-left: auto; margin-right: auto;">
+                </div>
+            
+                <div class="post">
+                    <h3>Lewis Hamilton's Shocking Move to Ferrari</h3>
+                    <p>In a surprising turn of events, Lewis Hamilton has made a shock move to Ferrari, leaving Mercedes after years of success together. This unexpected decision is set to shake up the F1 world.</p>
+                    <img src="./Image/t4.jpg" alt="" width="90px" style="display: block; margin-left: auto; margin-right: auto;">
+                </div>
+            </div>
+        </div>
+    
+        <div class="main-container">
+            <!-- Left Side Inputs -->
+            <div class="input-container">
+                <div class="form-section create-post">
+                    <h3 style="text-align: center;"> Create a Post</h3>
+                    <input type="text" id="postMessage" placeholder="Your message">
+                    <button onclick="publishPost()">Publish Post</button>
+                </div>
+        
+                <div class="form-section get-post">
+                    <h3 style="text-align: center;">Smart Search</h3>
+                    <div class="search-bar">
+                        <input type="number" id="postId" placeholder="Search Post by ID">
+                        <button onclick="getPost()">Search</button>
+                    </div>
+                    
+                    <!-- Output section -->
+                    <div id="postDetailsContainer" class="post-details-container">
+                        <p id="postDetails" class="post-detail-item"><strong>Message:</strong> <span id="message"></span></p>
+                        <p id="postDetails" class="post-detail-item"><strong>Author:</strong> <span id="author"></span></p>
+                        <p id="postDetails" class="post-detail-item"><strong>Likes:</strong> <span id="likes"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    
+            <!-- Right Side Table -->
+            <div class="posts-container">
+                <h3 style="text-align: center;">All Posts</h3>
+                <div id="postsList">
+                    <!-- Posts will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+    
+        <div id="toast" class="toast"></div> <!-- Toast Notification -->
+        <footer class="footer">
+            <!-- Waves Animation -->
+            <div class="waves">
+                <div class="wave" id="wave1"></div>
+                <div class="wave" id="wave2"></div>
+                <div class="wave" id="wave3"></div>
+                <div class="wave" id="wave4"></div>
+            </div>
+        
+            <!-- Social Media Icons -->
+            <ul class="social-icon">
+                <li class="social-icon__item">
+                    <a class="social-icon__link" href="#">
+                        <ion-icon name="logo-facebook"></ion-icon>
+                    </a>
+                </li>
+                <li class="social-icon__item">
+                    <a class="social-icon__link" href="#">
+                        <ion-icon name="logo-twitter"></ion-icon>
+                    </a>
+                </li>
+                <li class="social-icon__item">
+                    <a class="social-icon__link" href="#">
+                        <ion-icon name="logo-linkedin"></ion-icon>
+                    </a>
+                </li>
+                <li class="social-icon__item">
+                    <a class="social-icon__link" href="#">
+                        <ion-icon name="logo-instagram"></ion-icon>
+                    </a>
+                </li>
+            </ul>
+        
+            <!-- Menu Links -->
+            <ul class="menu">
+                <li class="menu__item"><a class="menu__link" href="#">Home</a></li>
+                <li class="menu__item"><a class="menu__link" href="#">About</a></li>
+                <li class="menu__item"><a class="menu__link" href="#">Contact</a></li>
+                <li class="menu__item"><a class="menu__link" href="#">Terms of Service</a></li>
+            </ul>
+        
+            <!-- Copyright Notice -->
+            <p>&copy; 2024 MiniSocial App | All Rights Reserved</p>
+        </footer>
+        
+        <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+        <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+        
+    </body>
+    
+    <script>    </script>
+</body>
+</html>

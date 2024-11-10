@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiniSocial DApp</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@4.15.0/dist/web3.min.js"></script>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            font-size: 17px;
+        }
+        .toast.show {
+            visibility: visible;
+            animation: fadeInOut 4s;
+        }
+        @keyframes fadeInOut {
+            0% { bottom: 30px; opacity: 0; }
+            30% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { bottom: 60px; opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <h1>MiniSocial DApp</h1>
+
+    <div>
+        <h3>Publish a Post</h3>
+        <input type="text" id="postMessage" placeholder="Your message">
+        <button onclick="publishPost()">Publish Post</button>
+    </div>
+
+    <div>
+        <h3>Get Post</h3>
+        <input type="number" id="postId" placeholder="Post ID">
+        <button onclick="getPost()">Get Post</button>
+        <p>Post Details: <span id="postDetails"></span></p>
+    </div>
+
+    <div>
+        <h3>Like Post</h3>
+        <input type="number" id="likePostId" placeholder="Post ID">
+        <button onclick="likePost()">Like Post</button>
+    </div>
+
+    <div>
+        <h3>Update Post</h3>
+        <input type="number" id="updatePostId" placeholder="Post ID">
+        <input type="text" id="newMessage" placeholder="New Message">
+        <button onclick="updatePost()">Update Post</button>
+    </div>
+
+    <div>
+        <h3>Delete Post</h3>
+        <input type="number" id="deletePostId" placeholder="Post ID">
+        <button onclick="deletePost()">Delete Post</button>
+    </div>
+
+    <h3>All Posts</h3>
+    <table id="postsTable">
+        <thead>
+            <tr>
+                <th>Post ID</th>
+                <th>Message</th>
+                <th>Author</th>
+                <th>Likes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Posts will be dynamically added here -->
+        </tbody>
+    </table>
+
+    <p>Status: <span id="status">Loading...</span></p>
+
+    <div id="toast" class="toast"></div> <!-- Toast Notification -->
+
+    <script>
+        let contract;
+        const contractAddress = '0x2E2Ed0Cfd3AD2f1d34481277b3204d807Ca2F8c2';  // Replace with your contract address
+        const contractABI = [
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "postId",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "author",
+				"type": "address"
+			}
+		],
+		"name": "PostDeleted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "postId",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "liker",
+				"type": "address"
+			}
+		],
+		"name": "PostLiked",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "postId",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "author",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "message",
+				"type": "string"
+			}
+		],
+		"name": "PostPublished",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "postId",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "author",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "newMessage",
+				"type": "string"
+			}
+		],
+		"name": "PostUpdated",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "index",
+				"type": "uint256"
+			}
+		],
+		"name": "deletePost",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "index",
+				"type": "uint256"
+			}
+		],
+		"name": "getPost",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getTotalPosts",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "getUserPostCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "index",
+				"type": "uint256"
+			}
+		],
+		"name": "likePost",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "likedByUser",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "posts",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "message",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "author",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "likeCount",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_message",
+				"type": "string"
+			}
+		],
+		"name": "publishPost",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "index",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_newMessage",
+				"type": "string"
+			}
+		],
+		"name": "updatePost",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "userPostCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+] // Replace with your contract ABI
+
+        async function loadWeb3() {
+            if (window.ethereum) {
+                window.web3 = new Web3(window.ethereum);
+                await window.ethereum.enable();
+            } else {
+                alert('Please install MetaMask!');
+            }
+        }
+
+        async function loadContract() {
+            contract = new window.web3.eth.Contract(contractABI, contractAddress);
+        }
+
+        function updateStatus(message) {
+            document.getElementById('status').innerText = message;
+            console.log(message);
+        }
+
+        // Toast function
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.innerText = message;
+            toast.className = "toast show";
+            setTimeout(function() {
+                toast.className = toast.className.replace("show", "");
+            }, 4000);
+        }
+
+        async function publishPost() {
+            const message = document.getElementById('postMessage').value;
+            const accounts = await web3.eth.getAccounts();
+            await contract.methods.publishPost(message).send({ from: accounts[0] });
+            showToast('Post published successfully.');
+            loadPosts(); // Reload posts after publishing
+        }
+
+        async function getPost() {
+            const postId = document.getElementById('postId').value;
+            const post = await contract.methods.getPost(postId).call();
+            document.getElementById('postDetails').innerText = `Message: ${post[0]}, Author: ${post[1]}, Likes: ${post[2]}`;
+        }
+
+        async function likePost() {
+            const postId = document.getElementById('likePostId').value;
+            const accounts = await web3.eth.getAccounts();
+            await contract.methods.likePost(postId).send({ from: accounts[0] });
+            showToast('Post liked successfully.');
+            loadPosts(); // Reload posts after liking
+        }
+
+        async function updatePost() {
+            const postId = document.getElementById('updatePostId').value;
+            const newMessage = document.getElementById('newMessage').value;
+            const accounts = await web3.eth.getAccounts();
+            await contract.methods.updatePost(postId, newMessage).send({ from: accounts[0] });
+            showToast('Post updated successfully.');
+            loadPosts(); // Reload posts after update
+        }
+
+        async function deletePost() {
+            const postId = document.getElementById('deletePostId').value;
+            const accounts = await web3.eth.getAccounts();
+            await contract.methods.deletePost(postId).send({ from: accounts[0] });
+            showToast('Post deleted successfully.');
+
+            // Remove the post row from the table
+            const table = document.getElementById('postsTable').getElementsByTagName('tbody')[0];
+            const rows = table.rows;
+            for (let i = 0; i < rows.length; i++) {
+                if (parseInt(rows[i].cells[0].innerText) === parseInt(postId)) {
+                    table.deleteRow(i);
+                    break;
+                }
+            }
+
+            loadPosts(); // Reload posts after delete
+        }
+
+        async function loadPosts() {
+    const startIndex = 0;  // Starting index for pagination (e.g., 0 for the first batch)
+    const count = 10;  // Number of posts to fetch per call
+
+    // Call the contract's getPosts function
+    const posts = await contract.methods.getPosts(startIndex, count).call();
+
+    const postIds = posts[0];
+    const messages = posts[1];
+    const authors = posts[2];
+    const likeCounts = posts[3];
+
+    const tableBody = document.getElementById('postsTable').getElementsByTagName('tbody')[0];
+    tableBody.innerHTML = ''; // Clear the existing table rows
+
+    for (let i = 0; i < postIds.length; i++) {
+        const row = tableBody.insertRow();
+        row.innerHTML = `
+            <td>${postIds[i]}</td>
+            <td>${messages[i]}</td>
+            <td>${authors[i]}</td>
+            <td>${likeCounts[i]}</td>
+        `;
+    }
+}
+
+
+        async function load() {
+            await loadWeb3();
+            await loadContract();
+            updateStatus('Ready to interact with the contract!');
+            loadPosts(); // Load posts when the page loads
+        }
+
+        load();
+    </script>
+</body>
+</html>
